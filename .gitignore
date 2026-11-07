@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+.idea/
+.vs/
+*.user
+.env
+.env.*
+!.env.example
+*.md
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.mp4
+TestResults/
