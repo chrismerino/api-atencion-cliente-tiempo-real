@@ -1,11 +1,18 @@
 using System.Text.Json.Serialization;
 using AtencionClientes.Api.Data;
+using AtencionClientes.Api.Hubs;
 using AtencionClientes.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
+builder.Services.AddSignalR().AddJsonProtocol(options =>
+    options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
+builder.Services.AddCors(options => options.AddPolicy("ClientesExternos", policy =>
+    policy.WithOrigins(builder.Configuration.GetSection("Cors:Origenes").Get<string[]>() ?? [])
+        .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+builder.Services.AddScoped<NotificacionesService>();
 builder.Services.AddDbContext<AtencionDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")
         ?? throw new InvalidOperationException("Configura ConnectionStrings__SqlServer antes de iniciar la API.")));
@@ -20,7 +27,9 @@ builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 app.UseExceptionHandler();
+app.UseCors("ClientesExternos");
 app.MapControllers();
+app.MapHub<TurnosHub>("/hubs/turnos");
 app.Run();
 
 public partial class Program;
