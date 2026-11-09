@@ -6,22 +6,37 @@ namespace AtencionClientes.Api.Controllers;
 
 [ApiController]
 [Route("api/clientes")]
-public class ClientesController(ClientesService service) : ControllerBase
+public class ClientesController : ControllerBase
 {
+    private readonly ClientesService _clientesService;
+
+    public ClientesController(ClientesService clientesService)
+    {
+        _clientesService = clientesService;
+    }
+
     [HttpPost]
     public async Task<ActionResult<ClienteRespuesta>> Crear(ClienteSolicitud datos, CancellationToken ct)
     {
-        var cliente = await service.CrearAsync(datos, ct);
+        var cliente = await _clientesService.CrearAsync(datos, ct);
         return CreatedAtAction(nameof(Obtener), new { id = cliente.Id }, cliente);
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<ClienteRespuesta>>> Listar(CancellationToken ct) => Ok(await service.ListarAsync(ct));
+    public async Task<ActionResult<List<ClienteRespuesta>>> Listar(CancellationToken ct)
+    {
+        return Ok(await _clientesService.ListarAsync(ct));
+    }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<ClienteRespuesta>> Obtener(int id, CancellationToken ct) => Ok(await service.ObtenerAsync(id, ct));
+    public async Task<ActionResult<ClienteRespuesta>> Obtener(int id, CancellationToken ct)
+    {
+        return Ok(await _clientesService.ObtenerAsync(id, ct));
+    }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<ClienteRespuesta>> Actualizar(int id, ClienteSolicitud datos, CancellationToken ct) =>
-        Ok(await service.ActualizarAsync(id, datos, ct));
+    public async Task<ActionResult<ClienteRespuesta>> Actualizar(int id, ClienteSolicitud datos, CancellationToken ct)
+    {
+        return Ok(await _clientesService.ActualizarAsync(id, datos, ct));
+    }
 }

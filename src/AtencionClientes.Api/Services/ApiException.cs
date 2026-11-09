@@ -1,6 +1,11 @@
 namespace AtencionClientes.Api.Services;
 
-public class ApiException(int statusCode, string message) : Exception(message)
+public class ApiException : Exception
 {
-    public int StatusCode { get; } = statusCode;
+    public int StatusCode { get; }
+
+    public ApiException(int statusCode, string message) : base(message)
+    {
+        StatusCode = statusCode;
+    }
 }

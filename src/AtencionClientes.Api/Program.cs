@@ -9,6 +9,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddDbContext<AtencionDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")
         ?? throw new InvalidOperationException("Configura ConnectionStrings__SqlServer antes de iniciar la API.")));
+builder.Services.AddScoped<TurnosRepository>();
+builder.Services.AddScoped<TurnosService>();
 builder.Services.AddScoped<ClientesRepository>();
 builder.Services.AddScoped<EmpleadosRepository>();
 builder.Services.AddScoped<ClientesService>();
