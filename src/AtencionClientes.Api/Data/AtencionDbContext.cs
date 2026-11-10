@@ -3,8 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AtencionClientes.Api.Data;
 
-public class AtencionDbContext(DbContextOptions<AtencionDbContext> options) : DbContext(options)
+public class AtencionDbContext : DbContext
 {
+    public AtencionDbContext(DbContextOptions<AtencionDbContext> options) : base(options)
+    {
+    }
+
     public DbSet<Cliente> Clientes => Set<Cliente>();
     public DbSet<Empleado> Empleados => Set<Empleado>();
     public DbSet<Turno> Turnos => Set<Turno>();
@@ -24,7 +28,7 @@ public class AtencionDbContext(DbContextOptions<AtencionDbContext> options) : Db
             entity.HasOne(t => t.Cliente).WithMany().HasForeignKey(t => t.ClienteId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(t => t.Empleado).WithMany().HasForeignKey(t => t.EmpleadoId).OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(t => new { t.Estado, t.CreadoEn, t.Id });
-            // Impide dos atenciones simultáneas para el mismo empleado, incluso con peticiones concurrentes.
+            // Un empleado solo puede tener un turno en atención.
             entity.HasIndex(t => t.EmpleadoId).IsUnique().HasFilter("[Estado] = 1 AND [EmpleadoId] IS NOT NULL");
             entity.ToTable(table =>
             {
