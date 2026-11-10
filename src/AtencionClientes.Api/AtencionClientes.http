@@ -1,0 +1,94 @@
+@baseUrl = http://localhost:5180
+
+### Registrar cliente Ana
+POST {{baseUrl}}/api/clientes
+Content-Type: application/json
+
+{"nombre":"Ana","correo":"ana@ejemplo.com","telefono":"70001111"}
+
+> {% client.global.set("clienteAna", response.body.id); %}
+
+### Registrar cliente Beatriz
+POST {{baseUrl}}/api/clientes
+Content-Type: application/json
+
+{"nombre":"Beatriz","correo":"bea@ejemplo.com"}
+
+> {% client.global.set("clienteBea", response.body.id); %}
+
+### Consultar clientes
+GET {{baseUrl}}/api/clientes
+
+### Consultar cliente
+GET {{baseUrl}}/api/clientes/{{clienteAna}}
+
+### Actualizar cliente
+PUT {{baseUrl}}/api/clientes/{{clienteAna}}
+Content-Type: application/json
+
+{"nombre":"Ana López","correo":"ana.lopez@ejemplo.com","telefono":"70001111"}
+
+### Registrar empleado
+POST {{baseUrl}}/api/empleados
+Content-Type: application/json
+
+{"nombre":"Luis"}
+
+> {% client.global.set("empleado", response.body.id); %}
+
+### Consultar empleados disponibles
+GET {{baseUrl}}/api/empleados/disponibles
+
+### Crear turno de Ana (conectar las consolas antes)
+POST {{baseUrl}}/api/turnos
+Content-Type: application/json
+
+{"clienteId":{{clienteAna}}}
+
+> {% client.global.set("turnoAna", response.body.id); %}
+
+### Crear turno de Beatriz
+POST {{baseUrl}}/api/turnos
+Content-Type: application/json
+
+{"clienteId":{{clienteBea}}}
+
+> {% client.global.set("turnoBea", response.body.id); %}
+
+### Consultar pendientes
+GET {{baseUrl}}/api/turnos/pendientes
+
+### Consultar turno
+GET {{baseUrl}}/api/turnos/{{turnoAna}}
+
+### Consultar posición de Beatriz
+GET {{baseUrl}}/api/turnos/{{turnoBea}}/posicion
+
+### Asignar e iniciar atención de Ana
+PATCH {{baseUrl}}/api/turnos/{{turnoAna}}/asignacion
+Content-Type: application/json
+
+{"empleadoId":{{empleado}}}
+
+### Finalizar atención de Ana
+POST {{baseUrl}}/api/turnos/{{turnoAna}}/finalizacion
+
+### Crear otro turno de Ana, detrás de Beatriz
+POST {{baseUrl}}/api/turnos
+Content-Type: application/json
+
+{"clienteId":{{clienteAna}}}
+
+> {% client.global.set("turnoAna", response.body.id); %}
+
+### Cancelar el turno de Beatriz y actualizar la fila
+PATCH {{baseUrl}}/api/turnos/{{turnoBea}}/estado
+Content-Type: application/json
+
+{"estado":"Cancelado"}
+
+### Iniciar mediante el endpoint de estado (alternativa a asignación)
+PATCH {{baseUrl}}/api/turnos/{{turnoAna}}/estado
+Content-Type: application/json
+
+{"estado":"EnAtencion","empleadoId":{{empleado}}}
