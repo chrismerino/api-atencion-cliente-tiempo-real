@@ -90,6 +90,18 @@ public class SignalRTests(ApiFactory factory) : ApiTest(factory)
         Assert.Equal(turno, (await nueva.Leer("PosicionActualizada")).GetProperty("turnoId").GetInt32());
     }
 
+    [Fact]
+    public async Task EstadoCompuestoNoModificaElTurnoNiEnviaCancelacion()
+    {
+        var cliente = await Cliente();
+        var turno = await Turno(cliente);
+        await using var conexion = await Conectar(cliente);
+        var response = await Http.PatchAsJsonAsync($"/api/turnos/{turno}/estado", new { estado = "EnAtencion, Atendido" });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("Pendiente", (await Consultar($"/api/turnos/{turno}")).GetProperty("estado").GetString());
+        await conexion.SinEvento("TurnoCancelado");
+    }
+
     private sealed class Conexion : IAsyncDisposable
     {
         private readonly Dictionary<string, Channel<JsonElement>> eventos = new();

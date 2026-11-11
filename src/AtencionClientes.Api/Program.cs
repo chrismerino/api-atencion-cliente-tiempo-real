@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using AtencionClientes.Api.Dtos;
 using AtencionClientes.Api.Data;
 using AtencionClientes.Api.Hubs;
 using AtencionClientes.Api.Services;
@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(options =>
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
+    options.JsonSerializerOptions.Converters.Add(new EstadoTurnoJsonConverter()));
 builder.Services.AddSignalR().AddJsonProtocol(options =>
-    options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
+    options.PayloadSerializerOptions.Converters.Add(new EstadoTurnoJsonConverter()));
 builder.Services.AddCors(options => options.AddPolicy("ClientesExternos", policy =>
     policy.WithOrigins(builder.Configuration.GetSection("Cors:Origenes").Get<string[]>() ?? [])
         .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));

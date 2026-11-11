@@ -48,4 +48,17 @@ public class ClientesEmpleadosTests(ApiFactory factory) : ApiTest(factory)
         Assert.Equal(id, Assert.Single(disponibles.EnumerateArray()).GetProperty("id").GetInt32());
         Assert.Equal(HttpStatusCode.BadRequest, (await Http.PostAsJsonAsync("/api/empleados", new { nombre = " " })).StatusCode);
     }
+    [Theory]
+    [InlineData(" @ ")]
+    [InlineData("ana @ejemplo.com")]
+    [InlineData("ana@ ejemplo.com")]
+    public async Task CorreoConEspaciosInternosNoSeRegistraNiActualiza(string correo)
+    {
+        Assert.Equal(HttpStatusCode.BadRequest, (await Http.PostAsJsonAsync("/api/clientes", new { nombre = "Ana", correo })).StatusCode);
+        Assert.Empty((await Consultar("/api/clientes")).EnumerateArray());
+        var cliente = await Cliente();
+        Assert.Equal(HttpStatusCode.BadRequest, (await Http.PutAsJsonAsync($"/api/clientes/{cliente}", new { nombre = "Ana", correo })).StatusCode);
+        Assert.Equal("ana@ejemplo.com", (await Consultar($"/api/clientes/{cliente}")).GetProperty("correo").GetString());
+    }
+
 }

@@ -122,4 +122,18 @@ public class TurnosTests(ApiFactory factory) : ApiTest(factory)
         Assert.Single(responses, r => r.StatusCode == HttpStatusCode.Conflict);
         Assert.Single((await Consultar("/api/empleados/disponibles")).EnumerateArray());
     }
+    [Fact]
+    public async Task RecuperarTurnosDelClienteIncluyeAtencionYExcluyeOtrosClientes()
+    {
+        var ana = await Cliente();
+        var bea = await Cliente("Beatriz");
+        var turno = await Turno(ana);
+        await Turno(bea);
+        await Asignar(turno, await Empleado());
+        var propios = (await Consultar($"/api/turnos?clienteId={ana}")).EnumerateArray().ToArray();
+        Assert.Equal(turno, Assert.Single(propios).GetProperty("id").GetInt32());
+        Assert.Equal("EnAtencion", propios[0].GetProperty("estado").GetString());
+        Assert.Equal(HttpStatusCode.NotFound, (await Http.GetAsync("/api/turnos?clienteId=999999")).StatusCode);
+    }
+
 }
