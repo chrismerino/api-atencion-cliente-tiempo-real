@@ -1,8 +1,11 @@
+using System.Text.Json.Nodes;
 using AtencionClientes.Api.Dtos;
 using AtencionClientes.Api.Data;
 using AtencionClientes.Api.Hubs;
+using AtencionClientes.Api.Models;
 using AtencionClientes.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -24,8 +27,22 @@ builder.Services.AddScoped<ClientesService>();
 builder.Services.AddScoped<EmpleadosService>();
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "API de atención al cliente", Version = "v1" });
+    options.MapType<EstadoTurno>(() => new OpenApiSchema
+    {
+        Type = JsonSchemaType.String,
+        Enum = Enum.GetNames<EstadoTurno>().Select(nombre => (JsonNode)JsonValue.Create(nombre)!).ToList()
+    });
+});
 
 var app = builder.Build();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.UseExceptionHandler();
 app.UseCors("ClientesExternos");
 app.MapControllers();
